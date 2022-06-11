@@ -4,31 +4,6 @@
 
 Рассмотрим приближенное решение задачи. Разобьём отрезок времени T на K равных интервалов delta_T и положим, что ускорение каждого тела постоянно в интервале времени delta_T. Чем большее число K разбиений интервала T и чем меньше интервал времени delta_T, тем точнее будет решение задачи.
 
-# Решение
-
-Рассмотрим тело на двумерной плоскости. Введём некоторую систему координат и обозначим текущее положение тела в этой системе координат (p_x, p_y) и его текущую скорость (v_x, v_y).
-По закону всемирного тяготения Ньютона между двумя телами действует сила гравитации F = (F_x, F_y):
-![](https://introcs.cs.princeton.edu/java/assignments/nbody.png)
-
-Где G = (6.67 * 10 ^(-11)) Н м ^ 2 / кг ^ 2. 
-
-Зная силу гравитации F = (F_x, F_y), действующую на тело массы m, по второму закону Ньютона можно найти ускорение тела (a_x, a_y) = (F_x / m, F_y / m).
-
-
-Построим алгоритм решения, состоящий из К шагов. Шаг алгоритма:
-
-1. С помощью закона всемирного тяготения Ньютона вычислим силу гравитации F, действующую на каждое тело. Для каждого тела B сила F будет равна суперпозиции сил гравитации, действующих между телом B и другими телами.
-
-2. Для каждого тела вычислим:
-
-      2.a Его ускорение (a_x, a_y) в данный момент времени, использую вычисленную ранее силу гравитации F, действующую на него.
-
-      2.b Новое значение скорости, используя текущую скорость (v_x, v_y) и полученное в 2.a ускорение: (V_x, V_y) = (v_x + delta_T * a_x, v_y + delta_T * a_y).
-
-      2.c Новое положение тела через время delta_T, используя текущее положение тела (p_x, p_y) и новое значение скорости (V_x, V_y) из 2.b: (P_x, P_y) = (p_x + delta_T * V_x, p_y + delta_T * V_y).
-
-Сложность алгоритма O(N ^ 2).
-
 # Алгоритм Барнса-Хата.
 
 Для ускорения вычислений можно заменить точное вычисление гравитационной силы F, действующей на тело B, из шага 1. приближенным её вычислением. Для этого найдём и сгруппируем все достаточно близко расположенные тела. Будем рассматривать группу тел как одно тело,  расположенное в центре масс этой группы тел. Масса этого тела равна сумме масс всех тел, входящих в группу.
@@ -46,30 +21,6 @@ y = (y1*m1 + y2*m2) / m
 ![](https://introcs.cs.princeton.edu/java/assignments/example.gif)
 
 Для того, чтобы вычислить гравитационную силу, действующую на конкретное тело B, необходимо совершить обход дерева начиная с корня. Если центр масса текущей вершины дерева находится достаточно далеко от тела B, то вычисляется гравитационная сила относительно этого центра масс. Иначе необходимо вычислить гравитационную силу относительно всех дочерних вершин данной вершины. Для того, чтобы определить достаточно ли далеко расположено тело по отношению к данной области необходимо вычислить соотношение s/d, где s -- размер области, а d -- расстояние от тела B до центра масс. Если s/d меньше заданной константы Theta, то будем считать, что тело B расположено достаточно далеко. 
-
-### Алгоритм построения дерева
- 
-Используем следующий рекурсивный алгоритм для добавления текущего тела B в дерево:
-1. Если текущая вершина дерева X не содержит ни одного тела, то добавляем тело B в текущую вершину.
-2. Если текущая вершина X является внутренней вершиной, то обновляем центр масс и общую массу вершины X. Рекурсивно добавляем тело B в нужный квадрант.
-3. Если текущая вершина X является листом, то значит она уже содержит некоторое тело C. Таким образом, тела B и С лежат в одной области. Тогда необходимо поделить эту область на 4 квадранта и добавить тела B и C в нужный вершины-квадранты. Возможно, что оба тела B и C попадут в одну и ту же вершину-квадрант, тогда процедуру деления области на квадратны необходимо повторить снова. После добавления новых вершин дерева необходимо обновить центр масс и общую массу для вершины X.
-
-Пример построения дерева для 5 тел:
-
-![](https://introcs.cs.princeton.edu/java/assignments/bhut-insert.png)
-
-### Алгоритм вычисления силы гравитации, действующей на тело
-
-Используем рекурсивную процедуру вычисления силы F, действующей на тело B. Начиная с корня дерева:
-1. Если текущая вершина листовая и это не вершина B, то вычисляем силу гравитации между B и телом, соответствующим текущей вершине.
-2. Если текущая вершина внутренняя, то вычислим соотношение s / d. Если s / d < Theta, то рассмотрим группу тел, соответствующих поддереву, как одно тело и вычислим гравитационную силу F между B и центром масс группы тел.
-3. Если s / d > Theta, то повторяем процедуру для каждой вершины поддерева.
-
-
-Сложность алгоритма Барнса-Хата O(N * log N).
-
-### Задание 1: реализовать базовый алгоритм
-### Задание 2: реализовать алгоритм Барнса-Хата
 
 ### Входные данные
 
@@ -95,107 +46,3 @@ Mercury X_2  Y_2
 Sun     X_3  Y_3
 Venus   X_4  Y_4
 ```
-### Программные интерфейсы
-
-Реализуйте следующие интерфейсы для решения заданий.
-```
-struct Cartesian
-{
-    double x;
-    double y;
-};
-
-// Single body representation, required for Problem 1 and Problem 2
-class Body
-{
-public:
-	Body(...);
-
-	double distance(const Body & b);
-
-	// calculate the force-on current body by the 'b' and add the value to accumulated force value
-        void add_force(const Body & b);
-	// reset accumulated force value
-	void reset_force();
-
-	// update body's velocity and position
-	void update(double delta_t);
-
-	friend std::ostream & operator <<(std::ostream&, const Body&);
-
-        // The methods below to be done for Burnes-Hut algorithm only
-        // Test if body is in quadrant
-        bool in(const Quadrant & q);
-        // Create new body representing center-of-mass of the invoking body and 'b'
-        Body plus(const Body & b);
-
-        friend std::ostream & operator <<(std::ostream&, const Body&);
-}
-```
-```
-// Quadrant representation, required for Problem 2
-class Quadrant
-{
-public:
-	// Create quadrant with center (x, y) and size 'lenth'
-	Quadrant(Cartesian center, double length);
-
-	// Test if point (x, y) is in the quadrant
-	bool contains(Cartesian p);
-	double length();
-
-	// The four methods below construct new Quadrant representing sub-quadrant of the invoking quadrant
-	Quadrant nw();
-	Quadrant ne();
-	Quadrant sw();
-	Quadrant se();
-
-	friend std::ostream& operator << (std::ostream&, const Quadrant&);
-}
-
-```
-```
-// Burnes-Hut tree representation, required for Problem 2
-class BHTreeNode
-{
-public:
-	BHTreeNode(...);
-
-	void insert(Body b);
-	// Update net acting force-on 'b'
-	void update_force(Body & b);
-}
-```
-
-```
-using Track = std::vector<Cartesian>;
-
-class PositionTracker
-{
-protected:
-    PositionTracker(const std::string & filename);
-
-public:
-    virtual Track track(const std::string & body_name, size_t end_time, size_t time_step) = 0;
-};
-
-class BasicPositionTracker: public PositionTracker
-{
-public:
-
-    BasicPositionTracker(const std::string & filename);
-    Track track(const std::string & body_name, size_t end_time, size_t time_step) override;
-};
-
-class FastPositionTracker: public PositionTracker
-{
-public:
-
-    FastPositionTracker(const std::string & filename);
-    Track track(const std::string & body_name, size_t end_time, size_t time_step) override;
-};
-```
-
-### Примечания
-
-* Используйте значение Theta равное 0.5 при решении задачи.
